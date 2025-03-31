@@ -20,4 +20,4 @@ This project is designed to monitor environmental parameters such as temperature
 ## 6. Flowchart for Arduino Code
 
 ## 7. Authors
-- **Author**: Nguyen Dang Duy
+- **Author**: Nguyen Dang Duy (@l1ttled1no)
