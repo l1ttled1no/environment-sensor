@@ -12,3 +12,12 @@ This project is designed to monitor environmental parameters such as temperature
 - 5V power supply for the ESP32 board.
 
 ## 3. Circuit Diagram
+
+## 4. Decoding the data
+
+## 5. Class Diagram for Python Code
+
+## 6. Flowchart for Arduino Code
+
+## 7. Authors
+- **Author**: Nguyen Dang Duy

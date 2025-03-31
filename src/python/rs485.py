@@ -1,8 +1,6 @@
 import serial 
 import time
 
-# BAUD = 4800 
-# ADDRESS = 1
 
 class ES_Intergrate_ODR_01:
     def __init__(self, port, baudrate, slave_id):
@@ -139,21 +137,21 @@ class ES_Intergrate_ODR_01:
             return data
         
 
-def main(): 
-    rs485 = ES_Intergrate_ODR_01(port='COM5', baudrate=BAUD, slave_id=Address)
-    if rs485.init():
-        rs485.print_info()
-        # data_type = 'all'
-        while True:
-            data = rs485.read_data('temperature')
-            if data:
-                # print("\nData: ", data.hex().upper())
-                # process_data = rs485.process_msg(data, 'temperature')
-                print("Temperature: ", data, "°C")
-                print("Repeating in 3 seconds...")
-                for i in range(3, 0, -1):
-                    print(".", end='')
-                    time.sleep(1)
+# def main(): 
+#     rs485 = ES_Intergrate_ODR_01(port='COM5', baudrate=BAUD, slave_id=Address)
+#     if rs485.init():
+#         rs485.print_info()
+#         # data_type = 'all'
+#         while True:
+#             data = rs485.read_data('temperature')
+#             if data:
+#                 # print("\nData: ", data.hex().upper())
+#                 # process_data = rs485.process_msg(data, 'temperature')
+#                 print("Temperature: ", data, "°C")
+#                 print("Repeating in 3 seconds...")
+#                 for i in range(3, 0, -1):
+#                     print(".", end='')
+#                     time.sleep(1)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
