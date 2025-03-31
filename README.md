@@ -1,4 +1,4 @@
-### ENVIRONMENTAL MONITORING SENSOR USING RS-485 PROTOCOL
+# ENVIRONMENTAL MONITORING SENSOR USING RS-485 PROTOCOL
 
 ## 1. Introduction
 This project is designed to monitor environmental parameters such as temperature, humidity, and air quality using a sensor module. The data is transmitted over an RS-485 communication protocol to a microcontroller for processing and display. The system is intended for use in various applications, including smart homes, industrial automation, and environmental monitoring.
