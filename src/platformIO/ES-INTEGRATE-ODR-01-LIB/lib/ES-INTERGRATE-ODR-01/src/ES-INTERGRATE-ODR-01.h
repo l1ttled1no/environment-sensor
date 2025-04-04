@@ -58,22 +58,24 @@ class ES_INTERGRATE_ODR_01 {
         uint8_t slave_id = 0; 
         HardwareSerial *serial = nullptr; // serial port of the sensor
         uint8_t div_val [8] = {10, 10, 10, 1, 1, 10, 1, 1}; // actual val = val / div_val[sensortype]
-        char *unit[8] = {"%", "C", "dB", "ug/m3", "ug/m3", "atm", "lux", "lux"}; // unit of the sensor
-        char *sensor_name[8] = {"Humidity", "Temperature", "Noise", "PM2.5", "PM10", "Air Pressure", "Light Lux", "Low Lux"}; // name of the sensor
     public: 
+        const char *unit[8] = {"%", "C", "dB", "ug/m3", "ug/m3", "atm", "lux", "lux"}; // unit of the sensor
+        const char *sensor_name[8] = {"Humidity", "Temperature", "Noise", "PM2.5", "PM10", "Air Pressure", "Light Lux", "Low Lux"}; // name of the sensor
+        ES_INTERGRATE_ODR_01();
         ES_INTERGRATE_ODR_01(
             uint16_t baudRate,
             uint8_t slave_id, 
             HardwareSerial serial
         ); 
-
+        
         void init(); //test for the initialization of the sensor
-        float read(uint8_t data);
+        float read(SensorType SensorType);
         float *readAll(); // read all the data from the sensor and return the data in a float array. The data is in the order of humidity, temperature, noise, PM2.5, PM10, air pressure, light lux, low lux.
-        void print(int data, HardwareSerial _serial); // print the data to the serial monitor. This one for debug only 
+        void print(SensorType data, HardwareSerial _serial); // print the data to the serial monitor. This one for debug only 
     private: 
-        uint16_t _read(uint8_t *data, uint8_t len, SensorType dt); // read the data from the sensor
-        uint16_t crc16_modbus(uint8_t *data, uint8_t len); // calculate the crc16 of the data
+        uint16_t _read(SensorType dt); // read the data from the sensor
+        uint16_t *_readAll(); // read all the data from the sensor and return the data in a float array. The data is in the order of humidity, temperature, noise, PM2.5, PM10, air pressure, light lux, low lux.
+        uint16_t crc16_modbus(const uint8_t *data, uint8_t len); // calculate the crc16 of the data
         
 
 };

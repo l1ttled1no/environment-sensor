@@ -8,8 +8,8 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "C:/Users/l1ttled1no/Documents/PlatformIO/Projects/ES-INTEGRATE-ODR-01-LIB/include",
-                "C:/Users/l1ttled1no/Documents/PlatformIO/Projects/ES-INTEGRATE-ODR-01-LIB/src",
+                "C:/Users/l1ttled1no/Documents/GitHub/environment-sensor/src/platformIO/ES-INTEGRATE-ODR-01-LIB/include",
+                "C:/Users/l1ttled1no/Documents/GitHub/environment-sensor/src/platformIO/ES-INTEGRATE-ODR-01-LIB/src",
                 "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include",
                 "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include",
                 "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include/esp_additions/freertos",
@@ -206,7 +206,7 @@
                 "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/dio_qspi/include",
                 "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                 "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/variants/d1_mini32",
-                "C:/Users/l1ttled1no/Documents/PlatformIO/Projects/ES-INTEGRATE-ODR-01-LIB/lib/ES-INTERGRATE-ODR-01/src",
+                "C:/Users/l1ttled1no/Documents/GitHub/environment-sensor/src/platformIO/ES-INTEGRATE-ODR-01-LIB/lib/ES-INTERGRATE-ODR-01/src",
                 "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                 "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
                 "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
@@ -245,8 +245,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "C:/Users/l1ttled1no/Documents/PlatformIO/Projects/ES-INTEGRATE-ODR-01-LIB/include",
-                    "C:/Users/l1ttled1no/Documents/PlatformIO/Projects/ES-INTEGRATE-ODR-01-LIB/src",
+                    "C:/Users/l1ttled1no/Documents/GitHub/environment-sensor/src/platformIO/ES-INTEGRATE-ODR-01-LIB/include",
+                    "C:/Users/l1ttled1no/Documents/GitHub/environment-sensor/src/platformIO/ES-INTEGRATE-ODR-01-LIB/src",
                     "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include",
                     "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include",
                     "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include/esp_additions/freertos",
@@ -443,7 +443,7 @@
                     "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/dio_qspi/include",
                     "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                     "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/variants/d1_mini32",
-                    "C:/Users/l1ttled1no/Documents/PlatformIO/Projects/ES-INTEGRATE-ODR-01-LIB/lib/ES-INTERGRATE-ODR-01/src",
+                    "C:/Users/l1ttled1no/Documents/GitHub/environment-sensor/src/platformIO/ES-INTEGRATE-ODR-01-LIB/lib/ES-INTERGRATE-ODR-01/src",
                     "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                     "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
                     "C:/Users/l1ttled1no/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",

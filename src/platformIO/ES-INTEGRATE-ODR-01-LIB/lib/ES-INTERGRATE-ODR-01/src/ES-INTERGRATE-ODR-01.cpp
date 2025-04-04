@@ -11,11 +11,16 @@
 */
 #include "ES-INTERGRATE-ODR-01.h"
 
+ES_INTERGRATE_ODR_01::ES_INTERGRATE_ODR_01(){
+    this->baudRate = DEFAULT_BAUD_RATE; 
+    this->slave_id = DEFAULT_SLAVE_ID; 
+    this->serial = &Serial2; // default serial port of the sensor
+}
 
 ES_INTERGRATE_ODR_01::ES_INTERGRATE_ODR_01(
     uint16_t baudRate = DEFAULT_BAUD_RATE,
     uint8_t slave_id = DEFAULT_SLAVE_ID, 
-    HardwareSerial serial = Serial1
+    HardwareSerial serial = Serial2
 ) {
     this->baudRate = baudRate; 
     this->slave_id = slave_id; 
@@ -28,18 +33,28 @@ void ES_INTERGRATE_ODR_01::init() {
     this->serial->flush(); // flush the serial port of the sensor
 }
 
-float ES_INTERGRATE_ODR_01::read(uint8_t data){
+float ES_INTERGRATE_ODR_01::read(SensorType data){
     if (data < humidity || data > lolux) {
         return -1; // invalid data type
     }
     float val = 0; 
+    uint16_t read_result = this->_read((SensorType)data); // read the data from the sensor
+    float result = (float)read_result / this->div_val[data]; // divide the data by the divisor
+    return result; 
 }
 
 float *ES_INTERGRATE_ODR_01::readAll() {   
-    //TODO
+    float *result = new float[8]{0}; // dynamically allocate memory for the result array
+    uint16_t *read_result = this->_readAll(); // read the data from the sensor
+    for (int i = 0; i < 8; ++i) {
+        result[i] = (float)read_result[i] / this->div_val[i]; // divide the data by the divisor
+    }
+    delete[] read_result; // delete the array to free memory
+    return result; // return the dynamically allocated array
 }
 
-void ES_INTERGRATE_ODR_01::print(int data, HardwareSerial _serial = Serial) { // Set for Serial monitoring. 
+void ES_INTERGRATE_ODR_01::print(SensorType data, HardwareSerial _serial = Serial) { // Set for Serial monitoring. 
+    //TODO: read data. 
     if (data < humidity || data > lolux) {
         _serial.println("Invalid data type. Please enter a valid data type.");
         return;
@@ -66,61 +81,134 @@ void ES_INTERGRATE_ODR_01::print(int data, HardwareSerial _serial = Serial) { //
     }
 }
 
-uint16_t ES_INTERGRATE_ODR_01::_read(uint8_t *data, uint8_t len, SensorType dt = all) {
-    if (dt == all) return 0; 
+uint16_t ES_INTERGRATE_ODR_01::_read(SensorType dt = all) {
+    if (dt == all) {
+        return 0; 
+        
+    }
     /*
     uint8_t data = {addr_code, func_code, init_addr (2bytes), num_of_reg (2bytes), crc (2bytes), low_crc_code(1 byte), high_crc_code(1 byte)};
     If size of these not mention, the default is 1 byte for each type (addrcode,... ).
     */
-    uint8_t send_data[SEND_DATA_LEN]; 
+   else {
+       uint8_t send_data[SEND_DATA_LEN]; 
+       send_data[0] = this->slave_id & 0xFF; // slave id
+       send_data[1] = FUNCTION_CODE & 0xFF; 
+       switch (dt){
+           case humidity:
+               send_data[2] = HUMID_ADDR >> 8 & 0xFF; // address of the sensor
+               send_data[3] = HUMID_ADDR & 0xFF; // address of the sensor
+               break;
+           case temp:
+               send_data[2] = TEMP_ADDR >> 8 & 0xFF; // address of the sensor
+               send_data[3] = TEMP_ADDR & 0xFF; // address of the sensor
+               break;
+           case noise:
+               send_data[2] = NOISE_ADDR >> 8 & 0xFF; // address of the sensor
+               send_data[3] = NOISE_ADDR & 0xFF; // address of the sensor
+               break;
+           case pm25:
+               send_data[2] = PM25_ADDR >> 8 & 0xFF; // address of the sensor
+               send_data[3] = PM25_ADDR & 0xFF; // address of the sensor
+               break;
+           case pm10:
+               send_data[2] = PM10_ADDR >> 8 & 0xFF; // address of the sensor
+               send_data[3] = PM10_ADDR & 0xFF; // address of the sensor
+               break;
+           case atm:
+               send_data[2] = ATM_ADDR >> 8 & 0xFF; // address of the sensor
+               send_data[3] = ATM_ADDR & 0xFF; // address of the sensor
+               break; 
+           case hilux:
+               send_data[2] = HILUX_ADDR >> 8 & 0xFF; // address of the sensor
+               send_data[3] = HILUX_ADDR & 0xFF; // address of the sensor
+               break;
+           case lolux:
+               send_data[2] = LOLUX_ADDR >> 8 & 0xFF; // address of the sensor
+               send_data[3] = LOLUX_ADDR & 0xFF; // address of the sensor
+               break;
+               default: break; 
+       }
+       // Note: since we only get 1 value, we only need to read 1 register.
+       send_data[4] = 0x00; 
+       send_data[5] = 0x01; 
+       uint16_t crc = crc16_modbus(send_data, SEND_DATA_LEN - 2); // calculate the crc of the data
+       send_data[6] = crc & 0xFF; // low byte of crc
+       send_data[7] = (crc >> 8) & 0xFF; // high byte of crc 
+       // Send the data, then read the data from the sensor
+       this->serial->write(send_data, sizeof(send_data)); // send the data to the sensor
+       delay(100); // wait for the sensor to respond 
+   
+       // FOR DEBUG: 
+    //    Serial.print("Send data: ");
+    //    for (int i = 0; i < sizeof(send_data); ++i) {
+    //        Serial.print(send_data[i], HEX); // print the data in hex format
+    //        Serial.print(" ");
+    //    }
+    //    Serial.println(); // print a new line
+    // //    Serial.print("Send data length: ");
+    //    Serial.println(sizeof(send_data)); // print the length of the data
+    //    // Set while loop to read the data from the sensor
+       while (true){
+           delay(100); 
+        //    Serial.println("Reading data... "); // print the data
+           if (this->serial->available() > 0) { // check if there is data available to read
+               uint8_t recv_data[DEFAULT_RECV_DATA_LEN]; 
+               this->serial->readBytes(recv_data, sizeof(recv_data)); // read the data from the sensor
+               /*
+               receive data format:
+               [slave_id (1 byte), function_code (1 byte), effective_byte (1 byte), data (2 bytes), crc (2 bytes)]
+               */
+               
+               // Check if the data is valid
+               if (
+                   recv_data[0] == this->slave_id && // check if the slave id is correct
+                   recv_data[1] == FUNCTION_CODE
+               ) {
+                   uint8_t data_check[] = {0, 0, 0, 0, 0}; 
+                   for (int i = 0; i < 5; ++i) {
+                       data_check[i] = recv_data[i]; 
+                   }
+                   uint16_t crc_check = crc16_modbus(data_check, sizeof(data_check)); // calculate the crc of the data
+                   if (
+                       (crc_check & 0xFF) == recv_data[5]
+                       && ((crc_check >> 8) & 0xFF) == recv_data[6] // check if the crc is correct
+                   )
+                   {
+                       //Start to transform data to integer date (uint16_t)
+                       uint16_t result = 0; 
+                       for (int i = 0; i < 2; ++i){
+                           result = result << 8; // shift left 8 bits
+                           result = result | recv_data[i + 3]; 
+                       }
+                       return result; // return the data
+                   }
+               }
+           }
+       } 
+       return 0; 
+   }
+}
+
+uint16_t *ES_INTERGRATE_ODR_01::_readAll(){
+    uint8_t send_data[SEND_DATA_LEN];
     send_data[0] = this->slave_id & 0xFF; // slave id
-    send_data[1] = FUNCTION_CODE & 0xFF; 
-    switch (dt){
-        case humidity:
-            send_data[2] = HUMID_ADDR & 0xFF; // address of the sensor
-            break;
-        case temp:
-            send_data[2] = TEMP_ADDR & 0xFF; // address of the sensor
-            break;
-        case noise:
-            send_data[2] = NOISE_ADDR & 0xFF; // address of the sensor
-            break;
-        case pm25:
-            send_data[2] = PM25_ADDR & 0xFF; // address of the sensor
-            break;
-        case pm10:
-            send_data[2] = PM10_ADDR & 0xFF; // address of the sensor
-            break;
-        case atm:
-            send_data[2] = ATM_ADDR & 0xFF; // address of the sensor
-            break; 
-        case hilux:
-            send_data[2] = HILUX_ADDR & 0xFF; // address of the sensor
-            break;
-        case lolux:
-            send_data[2] = LOLUX_ADDR & 0xFF; // address of the sensor
-            break;
-            default: break; 
-    }
-    // Note: since we only get 1 value, we only need to read 1 register.
-    send_data[3] = 0x00; 
-    send_data[4] = 0x01; 
+    send_data[1] = FUNCTION_CODE & 0xFF;
+    send_data[2] = HUMID_ADDR >> 8 & 0xFF; // address of the sensor
+    send_data[3] = HUMID_ADDR & 0xFF; // address of the sensor
+    send_data[4] = 0x00; // address of the sensor
+    send_data[5] = 0x08; // address of the sensor
     uint16_t crc = crc16_modbus(send_data, SEND_DATA_LEN - 2); // calculate the crc of the data
-    send_data[5] = crc & 0xFF; // low byte of crc
-    send_data[6] = (crc >> 8) & 0xFF; // high byte of crc 
+    send_data[6] = crc & 0xFF; // low byte of crc
+    send_data[7] = (crc >> 8) & 0xFF; // high byte of crc
     // Send the data, then read the data from the sensor
     this->serial->write(send_data, sizeof(send_data)); // send the data to the sensor
-    // Set while loop to read the data from the sensor
-    while (true){
-        if (this->serial->available() > 0) { // check if there is data available to read
-            uint8_t recv_data[DEFAULT_RECV_DATA_LEN]; 
+    while(true) {
+        delay(100); 
+        if (this->serial->available() > 0) {
+            uint8_t recv_data[5 + 2 * 8];
             this->serial->readBytes(recv_data, sizeof(recv_data)); // read the data from the sensor
-            /*
-            receive data format:
-            [slave_id (1 byte), function_code (1 byte), effective_byte (1 byte), data (2 bytes), crc (2 bytes)]
-            */
-            
-            // Check if the data is valid
+            // check if the data is valid
             if (
                 recv_data[0] == this->slave_id && // check if the slave id is correct
                 recv_data[1] == FUNCTION_CODE
@@ -136,21 +224,24 @@ uint16_t ES_INTERGRATE_ODR_01::_read(uint8_t *data, uint8_t len, SensorType dt =
                 )
                 {
                     //Start to transform data to integer date (uint16_t)
-                    uint16_t result = 0; 
-                    for (int i = 0; i < 2; ++i){
-                        result = result << 8; // shift left 8 bits
-                        result = result | recv_data[i + 3]; 
+                    uint16_t* result = new uint16_t[8];
+                    for (int i = 0; i < 8; ++i) {
+                        result[i] = 0; 
+                        for (int j = 0; j < 2; ++j){
+                            result[i] = result[i] << 8; // shift left 8 bits
+                            result[i] = result[i] | recv_data[i * 2 + j + 3]; 
+                        }
                     }
+                    
                     return result; // return the data
                 }
             }
         }
-    } 
-    return 0; 
+    }
+    return nullptr;
 }
 
-
-uint16_t crc16_modbus(const uint8_t *data, uint8_t len) {
+uint16_t ES_INTERGRATE_ODR_01:: crc16_modbus(const uint8_t *data, uint8_t len) {
     uint16_t crc = 0xFFFF; // Initialize CRC to 0xFFFF
     uint16_t polynomial = 0xA001; // Modbus polynomial
     for (uint8_t i = 0; i < len; i++) {
