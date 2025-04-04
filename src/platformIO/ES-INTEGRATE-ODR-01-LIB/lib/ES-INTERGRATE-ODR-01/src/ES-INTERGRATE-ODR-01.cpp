@@ -214,7 +214,7 @@ uint16_t *ES_INTERGRATE_ODR_01::_readAll() {
 
     // Timeout mechanism
     unsigned long start_time = millis();
-    while (millis() - start_time < 2000) { // 2-second timeout
+    while (millis() - start_time < 10000) { // 2-second timeout
         if (this->serial->available() > 0) {
             uint8_t recv_data[5 + 2 * 8]; // Expected response size: 5 header bytes + 2 bytes per register
             this->serial->readBytes(recv_data, sizeof(recv_data));
