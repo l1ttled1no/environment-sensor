@@ -17,24 +17,35 @@ void setup(){
     // Serial.println("Serial1 initialized.");
 }
 
-// uint8_t data[8] = {0x01, 0x03, 0x01, 0xf4, 0x00, 0x00, 0x05, 0xc4}; // example data
+// uint8_t data[8] = {0x01, 0x03, 0x01, 0xf4, 0x00, 0x08, 0x04, 0x02}; // example data
+// void loop(){
+//   Serial2.write(data, sizeof(data)); // send the data to the sensor
+//   Serial.println("Data sent to the sensor.");
+//   if (Serial2.available() > 0) { // check if there is data available to read
+//     uint8_t recv_data[5 + 2 * 8]; // 5 bytes for the header, 2 bytes for each of the 8 sensors
+//     Serial2.readBytes(recv_data, sizeof(recv_data)); // read the data from the sensor
+//     Serial.print("Received data: ");
+//     for (int i = 0; i < sizeof(recv_data); ++i) {
+//       Serial.print("0x");
+//       Serial.print(recv_data[i], HEX);
+//       Serial.print(", ");
+//     }
+//     Serial.println();
+//   }
+//   delay(1000); // delay for 1 second
+// }
+
 void loop(){
-  // Serial.print("Humidity: ");
-  //   float humid = sensor.read(humidity); 
-  //   Serial.print(humid);
-  //   Serial.println("%");
-  //   Serial.println(); 
-  //   delay(1000); 
-  // Read all data from the sensor
-  // float *val = sensor.readAll(); // read all data from the sensor
-  // Serial.println("Sensor read: ");
-  // for (int type = humidity; type < all; ++type){
-  //   Serial.print(sensor.sensor_name[type]);
-  //   Serial.print(": ");
-  //   Serial.print(val[type]);
-  //   Serial.print(" ");
-  //   Serial.println(sensor.unit[type]);
-  // }
+  float *result = sensor.readAll(); // read all the data from the sensor
+  Serial.println("Data: ");
+  for (int i = 0; i < 8; ++i) {
+    Serial.print(sensor.sensor_name[i]); 
+    Serial.print(": ");
+    Serial.print(result[i]);
+    Serial.print(" ");
+    Serial.println(sensor.unit[i]); 
+  }
+  Serial.println("Data read from the sensor.");
   delay(1000); // delay for 1 second
 }
 

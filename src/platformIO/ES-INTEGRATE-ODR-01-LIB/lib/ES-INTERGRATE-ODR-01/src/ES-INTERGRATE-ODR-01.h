@@ -59,7 +59,7 @@ class ES_INTERGRATE_ODR_01 {
         HardwareSerial *serial = nullptr; // serial port of the sensor
         uint8_t div_val [8] = {10, 10, 10, 1, 1, 10, 1, 1}; // actual val = val / div_val[sensortype]
     public: 
-        const char *unit[8] = {"%", "C", "dB", "ug/m3", "ug/m3", "atm", "lux", "lux"}; // unit of the sensor
+        const char *unit[8] = {"%", "C", "dB", "ug/m3", "ug/m3", "kPa", "lux", "lux"}; // unit of the sensor
         const char *sensor_name[8] = {"Humidity", "Temperature", "Noise", "PM2.5", "PM10", "Air Pressure", "Light Lux", "Low Lux"}; // name of the sensor
         ES_INTERGRATE_ODR_01();
         ES_INTERGRATE_ODR_01(

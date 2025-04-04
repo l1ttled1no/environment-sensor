@@ -7,7 +7,8 @@
     - This is the header file of the ES-INTERGRATE-ODR-01 sensor.
     - This is meant to build on ESP-32 only. (Because of using HardwareSerial)
     Changelog: 
-    - 03/04/2025: Created the header file and added the basic functions. 
+    - 03/04/2025: Created the header file and added the basic functions.
+    - 04/04/2025: Implement read each sensor. read_all is bugging rn dino. fix it.  
 */
 #include "ES-INTERGRATE-ODR-01.h"
 
@@ -46,6 +47,10 @@ float ES_INTERGRATE_ODR_01::read(SensorType data){
 float *ES_INTERGRATE_ODR_01::readAll() {   
     float *result = new float[8]{0}; // dynamically allocate memory for the result array
     uint16_t *read_result = this->_readAll(); // read the data from the sensor
+    if (read_result == nullptr) {
+        delete[] read_result; // free memory if read_result is null
+        return result; // return null if there was an error reading the data
+    }
     for (int i = 0; i < 8; ++i) {
         result[i] = (float)read_result[i] / this->div_val[i]; // divide the data by the divisor
     }
@@ -190,55 +195,53 @@ uint16_t ES_INTERGRATE_ODR_01::_read(SensorType dt = all) {
    }
 }
 
-uint16_t *ES_INTERGRATE_ODR_01::_readAll(){
+uint16_t *ES_INTERGRATE_ODR_01::_readAll() {
     uint8_t send_data[SEND_DATA_LEN];
-    send_data[0] = this->slave_id & 0xFF; // slave id
-    send_data[1] = FUNCTION_CODE & 0xFF;
-    send_data[2] = HUMID_ADDR >> 8 & 0xFF; // address of the sensor
-    send_data[3] = HUMID_ADDR & 0xFF; // address of the sensor
-    send_data[4] = 0x00; // address of the sensor
-    send_data[5] = 0x08; // address of the sensor
-    uint16_t crc = crc16_modbus(send_data, SEND_DATA_LEN - 2); // calculate the crc of the data
-    send_data[6] = crc & 0xFF; // low byte of crc
-    send_data[7] = (crc >> 8) & 0xFF; // high byte of crc
-    // Send the data, then read the data from the sensor
-    this->serial->write(send_data, sizeof(send_data)); // send the data to the sensor
-    while(true) {
-        delay(100); 
+
+    // Prepare the Modbus request
+    send_data[0] = this->slave_id & 0xFF; // Slave ID
+    send_data[1] = FUNCTION_CODE & 0xFF; // Function code
+    send_data[2] = HUMID_ADDR >> 8 & 0xFF; // High byte of starting address
+    send_data[3] = HUMID_ADDR & 0xFF; // Low byte of starting address
+    send_data[4] = 0x00; // High byte of number of registers
+    send_data[5] = 0x08; // Low byte of number of registers
+    uint16_t crc = crc16_modbus(send_data, SEND_DATA_LEN - 2); // Calculate CRC
+    send_data[6] = crc & 0xFF; // Low byte of CRC
+    send_data[7] = (crc >> 8) & 0xFF; // High byte of CRC
+
+    // Send the request
+    this->serial->write(send_data, sizeof(send_data));
+
+    // Timeout mechanism
+    unsigned long start_time = millis();
+    while (millis() - start_time < 2000) { // 2-second timeout
         if (this->serial->available() > 0) {
-            uint8_t recv_data[5 + 2 * 8];
-            this->serial->readBytes(recv_data, sizeof(recv_data)); // read the data from the sensor
-            // check if the data is valid
-            if (
-                recv_data[0] == this->slave_id && // check if the slave id is correct
-                recv_data[1] == FUNCTION_CODE
-            ) {
-                uint8_t data_check[] = {0, 0, 0, 0, 0}; 
-                for (int i = 0; i < 5; ++i) {
-                    data_check[i] = recv_data[i]; 
-                }
-                uint16_t crc_check = crc16_modbus(data_check, sizeof(data_check)); // calculate the crc of the data
-                if (
-                    (crc_check & 0xFF) == recv_data[5]
-                    && ((crc_check >> 8) & 0xFF) == recv_data[6] // check if the crc is correct
-                )
-                {
-                    //Start to transform data to integer date (uint16_t)
-                    uint16_t* result = new uint16_t[8];
-                    for (int i = 0; i < 8; ++i) {
-                        result[i] = 0; 
-                        for (int j = 0; j < 2; ++j){
-                            result[i] = result[i] << 8; // shift left 8 bits
-                            result[i] = result[i] | recv_data[i * 2 + j + 3]; 
-                        }
-                    }
+            uint8_t recv_data[5 + 2 * 8]; // Expected response size: 5 header bytes + 2 bytes per register
+            this->serial->readBytes(recv_data, sizeof(recv_data));
+
+            // Validate the response
+            if (recv_data[0] == this->slave_id && recv_data[1] == FUNCTION_CODE) {
+                // Calculate CRC on the received data (excluding the CRC bytes)
+                uint16_t crc_check = crc16_modbus(recv_data, sizeof(recv_data) - 2);
+                if ((crc_check & 0xFF) == recv_data[sizeof(recv_data) - 2] &&
+                    ((crc_check >> 8) & 0xFF) == recv_data[sizeof(recv_data) - 1]) {
                     
-                    return result; // return the data
+                    // Parse the data
+                    uint16_t *result = new uint16_t[8];
+                    for (int i = 0; i < 8; ++i) {
+                        result[i] = (recv_data[3 + i * 2] << 8) | recv_data[4 + i * 2];
+                    }
+                    return result; // Return the parsed data
+                } else {
+                    Serial.println("CRC check failed.");
+                    return nullptr; // CRC validation failed
                 }
             }
         }
     }
-    return nullptr;
+
+    Serial.println("Sensor response timeout.");
+    return nullptr; // Timeout occurred
 }
 
 uint16_t ES_INTERGRATE_ODR_01:: crc16_modbus(const uint8_t *data, uint8_t len) {
