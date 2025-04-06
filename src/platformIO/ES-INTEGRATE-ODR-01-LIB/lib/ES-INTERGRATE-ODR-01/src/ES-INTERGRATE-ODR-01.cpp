@@ -1,8 +1,6 @@
 /*
     Author: l1ttled1no
     Date: 03/04/2025
-     Author: l1ttled1no
-    Date: 03/04/2025
     Note from author: 
     - This is the header file of the ES-INTERGRATE-ODR-01 sensor.
     - This is meant to build on ESP-32 only. (Because of using HardwareSerial)
