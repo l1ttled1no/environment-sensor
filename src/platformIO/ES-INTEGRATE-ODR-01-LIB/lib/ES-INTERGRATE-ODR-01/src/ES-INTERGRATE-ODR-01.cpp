@@ -233,14 +233,14 @@ uint16_t *ES_INTERGRATE_ODR_01::_readAll() {
                     }
                     return result; // Return the parsed data
                 } else {
-                    Serial.println("CRC check failed.");
+                    // Serial.println("CRC check failed.");
                     return nullptr; // CRC validation failed
                 }
             }
         }
     }
 
-    Serial.println("Sensor response timeout.");
+    // Serial.println("Sensor response timeout.");
     return nullptr; // Timeout occurred
 }
 
